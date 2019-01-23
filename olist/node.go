@@ -6,20 +6,20 @@ import (
 
 //Node is double LinkNode
 type Node struct {
+	MyNode
 	x, y     int
-	id       uint32
 	xEl, yEl *list.Element
 }
 
-func NewNode(id uint32, x, y int) *Node {
+func NewNode(node MyNode, x, y int) *Node {
 	return &Node{
-		id: id,
-		x:  x,
-		y:  y,
+		MyNode: node,
+		x:      x,
+		y:      y,
 	}
 }
 
-func (this *Node) Id() uint32 { return this.id }
+func (this *Node) Id() uint64 { return this.UniqueId() }
 func (this *Node) X() int     { return this.x }
 func (this *Node) Y() int     { return this.y }
 func (this *Node) SetX(x int) { this.x = x }
@@ -35,12 +35,12 @@ func (this *Node) ClearElement() {
 	this.yEl = nil
 }
 
-func (this *Node) GetRangeMap() map[uint32]*Node {
+func (this *Node) GetRangeMap() map[uint64]*Node {
 	if this.xEl == nil || this.yEl == nil {
 		return nil
 	}
-	inListX := make(map[uint32]bool)
-	result := make(map[uint32]*Node)
+	inListX := make(map[uint64]bool)
+	result := make(map[uint64]*Node)
 	for e := this.xEl.Prev(); e != nil; e = e.Prev() {
 		eNode := e.Value.(*Node)
 		// fmt.Printf("check xel prev enode:%v\n", eNode)

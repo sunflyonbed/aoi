@@ -11,34 +11,34 @@ const (
 
 type Map struct {
 	xList, yList *list.List
-	nodes        map[uint32]*Node
+	nodes        map[uint64]*Node
 
-	moveMap  map[uint32]*Node
-	enterMap map[uint32]*Node
-	leaveMap map[uint32]*Node
+	moveMap  map[uint64]*Node
+	enterMap map[uint64]*Node
+	leaveMap map[uint64]*Node
 }
 
 func NewMap() *Map {
 	return &Map{
 		xList: list.New(),
 		yList: list.New(),
-		nodes: make(map[uint32]*Node),
+		nodes: make(map[uint64]*Node),
 
-		moveMap:  make(map[uint32]*Node),
-		enterMap: make(map[uint32]*Node),
-		leaveMap: make(map[uint32]*Node),
+		moveMap:  make(map[uint64]*Node),
+		enterMap: make(map[uint64]*Node),
+		leaveMap: make(map[uint64]*Node),
 	}
 }
 
-func (this *Map) GetNode(id uint32) *Node { return this.nodes[id] }
-func (this *Map) AddNode(id uint32, x, y int) {
-	if this.GetNode(id) != nil {
+func (this *Map) GetNode(id uint64) *Node { return this.nodes[id] }
+func (this *Map) AddNode(myNode MyNode, x, y int) {
+	if this.GetNode(myNode.UniqueId()) != nil {
 		return
 	}
-	node := NewNode(id, x, y)
-	this.nodes[id] = node
+	node := NewNode(myNode, x, y)
+	this.nodes[node.Id()] = node
 	insert := false
-	inListX := make(map[uint32]bool)
+	inListX := make(map[uint64]bool)
 	var xEl, yEl *list.Element
 	for e := this.xList.Front(); e != nil; e = e.Next() {
 		eNode := e.Value.(*Node)
@@ -81,7 +81,7 @@ func (this *Map) AddNode(id uint32, x, y int) {
 	this.BroadCast(node)
 }
 
-func (this *Map) MoveNode(id uint32, x, y int) {
+func (this *Map) MoveNode(id uint64, x, y int) {
 	node := this.GetNode(id)
 	if node == nil {
 		return
@@ -187,20 +187,23 @@ func (this *Map) ChangePosition(node *Node, x, y int) {
 
 func (this *Map) BroadCast(node *Node) {
 	for _, v := range this.moveMap {
-		fmt.Printf("Node:%d see move:%d\n", v.Id(), node.Id())
+		v.OnMove(node.Id())
+		// fmt.Printf("Node:%d see move:%d\n", v.Id(), node.Id())
 	}
 	for _, v := range this.enterMap {
-		fmt.Printf("Node:%d see enter:%d\n", v.Id(), node.Id())
+		v.OnEnter(node.Id())
+		// fmt.Printf("Node:%d see enter:%d\n", v.Id(), node.Id())
 	}
 	for _, v := range this.leaveMap {
-		fmt.Printf("Node:%d see leave:%d\n", v.Id(), node.Id())
+		v.OnLeave(node.Id())
+		// fmt.Printf("Node:%d see leave:%d\n", v.Id(), node.Id())
 	}
-	this.moveMap = make(map[uint32]*Node)
-	this.enterMap = make(map[uint32]*Node)
-	this.leaveMap = make(map[uint32]*Node)
+	this.moveMap = make(map[uint64]*Node)
+	this.enterMap = make(map[uint64]*Node)
+	this.leaveMap = make(map[uint64]*Node)
 }
 
-func (this *Map) LeaveNode(id uint32) {
+func (this *Map) LeaveNode(id uint64) {
 	node := this.GetNode(id)
 	if node == nil {
 		return

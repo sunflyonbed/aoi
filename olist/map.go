@@ -5,28 +5,26 @@ import (
 	"fmt"
 )
 
-const (
-	BroadCastRange = 2
-)
-
 type Map struct {
 	xList, yList *list.List
 	nodes        map[uint64]*Node
 
-	moveMap  map[uint64]*Node
-	enterMap map[uint64]*Node
-	leaveMap map[uint64]*Node
+	moveMap   map[uint64]*Node
+	enterMap  map[uint64]*Node
+	leaveMap  map[uint64]*Node
+	rangeSize int
 }
 
-func NewMap() *Map {
+func NewMap(size int) *Map {
 	return &Map{
 		xList: list.New(),
 		yList: list.New(),
 		nodes: make(map[uint64]*Node),
 
-		moveMap:  make(map[uint64]*Node),
-		enterMap: make(map[uint64]*Node),
-		leaveMap: make(map[uint64]*Node),
+		moveMap:   make(map[uint64]*Node),
+		enterMap:  make(map[uint64]*Node),
+		leaveMap:  make(map[uint64]*Node),
+		rangeSize: size,
 	}
 }
 
@@ -43,14 +41,14 @@ func (this *Map) AddNode(myNode MyNode, x, y int) {
 	for e := this.xList.Front(); e != nil; e = e.Next() {
 		eNode := e.Value.(*Node)
 		diff := eNode.X() - node.X()
-		if abs(diff) <= BroadCastRange {
+		if abs(diff) <= this.rangeSize {
 			inListX[eNode.Id()] = true
 		}
 		if !insert && e.Value.(*Node).X() > node.X() {
 			xEl = this.xList.InsertBefore(node, e)
 			insert = true
 		}
-		if diff > BroadCastRange {
+		if diff > this.rangeSize {
 			break
 		}
 	}
@@ -62,14 +60,14 @@ func (this *Map) AddNode(myNode MyNode, x, y int) {
 	for e := this.yList.Front(); e != nil; e = e.Next() {
 		eNode := e.Value.(*Node)
 		diff := eNode.Y() - node.Y()
-		if abs(diff) <= BroadCastRange && inListX[eNode.Id()] {
+		if abs(diff) <= this.rangeSize && inListX[eNode.Id()] {
 			this.enterMap[eNode.Id()] = eNode
 		}
 		if !insert && e.Value.(*Node).Y() > node.Y() {
 			yEl = this.yList.InsertBefore(node, e)
 			insert = true
 		}
-		if diff > BroadCastRange {
+		if diff > this.rangeSize {
 			break
 		}
 	}
@@ -87,10 +85,10 @@ func (this *Map) MoveNode(id uint64, x, y int) {
 		return
 	}
 
-	oldMap := node.GetRangeMap()
+	oldMap := node.GetRangeMap(this.rangeSize)
 	// fmt.Printf("get oldMap:%d %v\n", id, oldMap)
 	this.ChangePosition(node, x, y)
-	newMap := node.GetRangeMap()
+	newMap := node.GetRangeMap(this.rangeSize)
 	// fmt.Printf("get newMap:%d %v\n", id, newMap)
 
 	for id, v := range oldMap {
@@ -208,7 +206,7 @@ func (this *Map) LeaveNode(id uint64) {
 	if node == nil {
 		return
 	}
-	this.leaveMap = node.GetRangeMap()
+	this.leaveMap = node.GetRangeMap(this.rangeSize)
 	this.xList.Remove(node.XElement())
 	this.yList.Remove(node.YElement())
 	this.BroadCast(node)
@@ -217,6 +215,6 @@ func (this *Map) LeaveNode(id uint64) {
 
 func (this *Map) PrintAOI() {
 	for _, v := range this.nodes {
-		fmt.Printf("printAOI:%d %v\n", v.Id(), v.GetRangeMap())
+		fmt.Printf("printAOI:%d %v\n", v.Id(), v.GetRangeMap(this.rangeSize))
 	}
 }

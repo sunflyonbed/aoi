@@ -35,7 +35,7 @@ func (this *Node) ClearElement() {
 	this.yEl = nil
 }
 
-func (this *Node) GetRangeMap() map[uint64]*Node {
+func (this *Node) GetRangeMap(rangeSize int) map[uint64]*Node {
 	if this.xEl == nil || this.yEl == nil {
 		return nil
 	}
@@ -44,7 +44,7 @@ func (this *Node) GetRangeMap() map[uint64]*Node {
 	for e := this.xEl.Prev(); e != nil; e = e.Prev() {
 		eNode := e.Value.(*Node)
 		// fmt.Printf("check xel prev enode:%v\n", eNode)
-		if eNode.X()+BroadCastRange >= this.X() {
+		if eNode.X()+rangeSize >= this.X() {
 			inListX[eNode.Id()] = true
 		} else {
 			break
@@ -53,7 +53,7 @@ func (this *Node) GetRangeMap() map[uint64]*Node {
 	for e := this.xEl.Next(); e != nil; e = e.Next() {
 		eNode := e.Value.(*Node)
 		// fmt.Printf("check xel next enode:%v\n", eNode)
-		if eNode.X() <= this.X()+BroadCastRange {
+		if eNode.X() <= this.X()+rangeSize {
 			inListX[eNode.Id()] = true
 		} else {
 			break
@@ -63,7 +63,7 @@ func (this *Node) GetRangeMap() map[uint64]*Node {
 	for e := this.yEl.Prev(); e != nil; e = e.Prev() {
 		eNode := e.Value.(*Node)
 		// fmt.Printf("check yel prev enode:%v\n", eNode)
-		if eNode.Y()+BroadCastRange >= this.Y() {
+		if eNode.Y()+rangeSize >= this.Y() {
 			if inListX[eNode.Id()] {
 				result[eNode.Id()] = eNode
 			}
@@ -75,7 +75,7 @@ func (this *Node) GetRangeMap() map[uint64]*Node {
 	for e := this.yEl.Next(); e != nil; e = e.Next() {
 		eNode := e.Value.(*Node)
 		// fmt.Printf("check yel next enode:%v\n", eNode)
-		if eNode.Y() <= this.Y()+BroadCastRange {
+		if eNode.Y() <= this.Y()+rangeSize {
 			if inListX[eNode.Id()] {
 				result[eNode.Id()] = eNode
 			}

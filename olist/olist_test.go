@@ -1,7 +1,7 @@
 package olist
 
 import (
-	"fmt"
+	"math/rand"
 	"testing"
 )
 
@@ -17,13 +17,13 @@ type TestNode struct {
 
 func (this *TestNode) UniqueId() uint64 { return this.Id }
 func (this *TestNode) OnEnter(id uint64) {
-	fmt.Printf("Node:%d see move:%d\n", this.Id, id)
+	// fmt.Printf("Node:%d see move:%d\n", this.Id, id)
 }
 func (this *TestNode) OnLeave(id uint64) {
-	fmt.Printf("Node:%d see leave:%d\n", this.Id, id)
+	// fmt.Printf("Node:%d see leave:%d\n", this.Id, id)
 }
 func (this *TestNode) OnMove(id uint64) {
-	fmt.Printf("Node:%d see move:%d\n", this.Id, id)
+	// fmt.Printf("Node:%d see move:%d\n", this.Id, id)
 }
 
 /*
@@ -36,7 +36,7 @@ func (this *TestNode) OnMove(id uint64) {
 		1	2	3	4	5	6
 */
 func TestOlist(t *testing.T) {
-	scene := NewMap()
+	scene := NewMap(2)
 	scene.AddNode(NewTestNode(1), 1, 5)
 	scene.AddNode(NewTestNode(2), 6, 6)
 	scene.AddNode(NewTestNode(3), 3, 1)
@@ -48,4 +48,33 @@ func TestOlist(t *testing.T) {
 	scene.MoveNode(1, 1, 1)
 	scene.MoveNode(4, 2, 1)
 	scene.PrintAOI()
+	scene.LeaveNode(4)
+	scene.PrintAOI()
+}
+
+const (
+	BenchmarkNodeSize = 1000
+	BenchmarkMapSize  = 100
+)
+
+//go test -test.bench=".*" -count=5
+func BenchmarkOlist(b *testing.B) {
+	scene := NewMap(2)
+	exist := make(map[uint64]bool)
+	for i := 0; i < b.N; i++ {
+		id := uint64(i%BenchmarkNodeSize) + 1
+		if !exist[id] {
+			scene.AddNode(NewTestNode(id), 1, 1)
+			continue
+		}
+		result := rand.Intn(10)
+		x := rand.Intn(BenchmarkMapSize)
+		y := rand.Intn(BenchmarkMapSize)
+		switch result {
+		case 0:
+			scene.LeaveNode(id)
+		default:
+			scene.MoveNode(id, x, y)
+		}
+	}
 }

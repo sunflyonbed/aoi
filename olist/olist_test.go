@@ -1,6 +1,7 @@
 package olist
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -17,13 +18,13 @@ type TestNode struct {
 
 func (this *TestNode) UniqueId() uint64 { return this.Id }
 func (this *TestNode) OnEnter(id uint64) {
-	// fmt.Printf("Node:%d see move:%d\n", this.Id, id)
+	fmt.Printf("Node:%d see enter:%d\n", this.Id, id)
 }
 func (this *TestNode) OnLeave(id uint64) {
-	// fmt.Printf("Node:%d see leave:%d\n", this.Id, id)
+	fmt.Printf("Node:%d see leave:%d\n", this.Id, id)
 }
 func (this *TestNode) OnMove(id uint64) {
-	// fmt.Printf("Node:%d see move:%d\n", this.Id, id)
+	fmt.Printf("Node:%d see move:%d\n", this.Id, id)
 }
 
 /*
@@ -50,6 +51,7 @@ func TestOlist(t *testing.T) {
 	scene.PrintAOI()
 	scene.LeaveNode(4)
 	scene.PrintAOI()
+
 }
 
 const (
